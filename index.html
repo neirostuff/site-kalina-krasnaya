@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>База отдыха "Калина красная" | Отдых в Анапе</title>
+    <meta name="description" content="База отдыха 'Калина красная' — комфортный отдых в 30 метрах от пляжа Черного моря в Анапе. Номера, кафе, развлечения и трансфер.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <style>
+        :root {
+            /* Light Theme (Default) */
+            --bg-color: #f7f9fc;
+            --text-main: #1a202c;
+            --text-muted: #4a5568;
+            --primary: #0ea5e9;
+            --primary-hover: #0284c7;
+            --secondary: #f59e0b;
+            --secondary-hover: #d97706;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.4);
+            --header-bg: rgba(255, 255, 255, 0.85);
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --modal-overlay: rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --primary-hover: #7dd3fc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --header-bg: rgba(15, 23, 42, 0.85);
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            --modal-overlay: rgba(0, 0, 0, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden !important;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Onest', sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        img, svg, video, iframe {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        /* Utility */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: var(--text-main);
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 15px 0;
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .nav-links a {
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .phone-link {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .phone-link:hover {
+            color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background-color: var(--primary);
+            color: #fff;
+            border-radius: 50px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        /* Theme Toggle & Wink Animation */
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-main);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 5px;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: rotate(15deg);
+        }
+
+        @keyframes themeToggleWink {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            10% { transform: scale(1.2) rotate(-10deg); filter: brightness(1.3); }
+            20% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+            30% { transform: scale(1.2) rotate(10deg); filter: brightness(1.3); }
+            40% { transform: scale(1); filter: brightness(1); }
+        }
+
+        .theme-toggle.wink {
+            animation: themeToggleWink 2s ease infinite;
+        }
+        
+        [data-theme="dark"] .theme-toggle.wink {
+            animation: none; /* Only wink in light mode or adapt it */
+        }
+
+        .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        /* Mobile Drawer */
+        .mobile-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100vh;
+            background: var(--header-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-left: 1px solid var(--card-border);
+            padding: 80px 30px;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .mobile-drawer.active {
+            transform: translateX(0);
+        }
+        
+        .mobile-drawer .nav-links {
+            flex-direction: column;
+            white-space: normal;
+        }
+        
+        .drawer-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 2.5rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        /* Hero Slider with Ken Burns */
+        .hero {
+            position: relative;
+            height: 100vh;
+            min-height: 600px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-align: center;
+        }
+
+        .hero-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .hero-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            transform: scale(1.1); /* Base scale for Ken Burns */
+        }
+
+        .hero-slide.active {
+            opacity: 1;
+            animation: kenBurns 15s ease-out forwards;
+        }
+
+        @keyframes kenBurns {
+            0% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 0 20px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+
+        /* Sections General */
+        section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        /* Pains Section */
+        .pains-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        
+        .pain-card {
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .pain-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .pain-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .pain-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .service-card {
+            overflow: hidden;
+            border-radius: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .service-img-wrapper {
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .service-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .service-card:hover .service-img-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .service-content {
+            padding: 2rem;
+        }
+
+        .service-content h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .service-content p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* FAQ */
+        .faq-item {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .faq-question {
+            font-family: 'Unbounded', sans-serif;
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+            transition: transform 0.3s ease;
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, margin-top 0.3s ease;
+            color: var(--text-muted);
+        }
+
+        .faq-item.open .faq-answer {
+            max-height: 200px;
+            margin-top: 1rem;
+        }
+
+        .faq-item.open .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        /* Contacts & Map */
+        .contacts-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: stretch;
+        }
+
+        .contact-info {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .contact-text h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .contact-text p, .contact-text a {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .map-container {
+            border-radius: 20px;
+            overflow: hidden;
+            min-height: 400px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--header-bg);
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .footer-socials {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px);
+            background: var(--primary-hover);
+        }
+
+        /* Chat Widget */
+        .chat-widget {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+
+        .chat-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .chat-btn:before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .chat-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-box {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transform-origin: bottom right;
+            animation: chatPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes chatPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .chat-box.active {
+            display: flex;
+        }
+
+        .chat-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Unbounded', sans-serif;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            height: 250px;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-msg {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+        }
+
+        .msg-bot {
+            background: var(--bg-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            background: var(--bg-color);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .chat-input button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        .chat-input button:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--modal-overlay);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 2.5rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 450px;
+            transform: translateY(30px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px; right: 20px;
+            background: none; border: none;
+            font-size: 2rem; color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block; margin-bottom: 0.5rem; font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%; padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            background: var(--bg-color);
+            color: var(--text-main);
+            outline: none;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Fixed Mobile Call Button */
+        .mobile-call-btn {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            z-index: 998;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 1150px) {
+            .nav-links, .header-actions .phone-link, .header-actions .btn {
+                display: none; /* Hide for mobile menu */
+            }
+            .menu-btn {
+                display: block;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .contacts-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 { font-size: 3rem; }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1.2rem; }
+            .section-title { font-size: 2rem; }
+            
+            .services-grid { grid-template-columns: 1fr; }
+            .pains-grid { grid-template-columns: 1fr; }
+            
+            .mobile-call-btn { display: block; }
+            body { padding-bottom: 60px; } /* Space for mobile btn */
+            
+            .chat-widget { bottom: 80px; right: 15px; }
+            .chat-box { width: calc(100vw - 32px); bottom: 70px; right: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="container header-inner">
+            <a href="#" class="logo">Калина красная</a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#about">О&nbsp;базе</a></li>
+                    <li><a href="#services">Услуги</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#contacts">Контакты</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <button class="theme-toggle wink" id="themeToggle" aria-label="Переключить тему">
+                    🌙
+                </button>
+                <a href="tel:89184445592" class="phone-link">8 (918) 444-55-92</a>
+                <button class="btn" onclick="openModal()">Заказать звонок</button>
+                <button class="menu-btn" id="menuBtn" aria-label="Открыть меню">☰</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-drawer" id="mobileDrawer">
+        <button class="drawer-close" id="drawerClose" aria-label="Закрыть меню">×</button>
+        <ul class="nav-links" style="display:flex;">
+            <li><a href="#about" class="drawer-link">О&nbsp;базе</a></li>
+            <li><a href="#services" class="drawer-link">Услуги</a></li>
+            <li><a href="#faq" class="drawer-link">FAQ</a></li>
+            <li><a href="#contacts" class="drawer-link">Контакты</a></li>
+        </ul>
+        <a href="tel:89184445592" class="phone-link" style="display:block;">8 (918) 444-55-92</a>
+        <button class="btn" onclick="openModal()" style="display:inline-block; width:100%;">Заказать звонок</button>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-slider">
+            <div class="hero-slide active" style="background-image: url('images/hero-bg1.webp');" fetchpriority="high" decoding="async"></div>
+            <div class="hero-slide" style="background-image: url('images/hero-bg2.webp');" loading="lazy" decoding="async"></div>
+        </div>
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <h1>Идеальный отдых на&nbsp;берегу моря</h1>
+            <p>База отдыха «Калина красная» — ваш комфорт всего в&nbsp;30&nbsp;метрах от&nbsp;песчаного пляжа Анапы.</p>
+            <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+                <button class="btn" onclick="openModal()">Забронировать номер</button>
+                <a href="https://vk.com/kalina_krasnaya_anapa" target="_blank" class="btn btn-secondary">Запросить в&nbsp;ВК</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pains -> Advantages -->
+    <section id="about" class="container">
+        <h2 class="section-title fade-in">Почему выбирают нас?</h2>
+        <div class="pains-grid">
+            <div class="pain-card glass fade-in">
+                <div class="pain-icon">🏖️</div>
+                <h3>Близость к&nbsp;морю</h3>
+                <p>Устали от&nbsp;долгих походов на&nbsp;пляж? Наша база находится всего в&nbsp;30&nbsp;метрах от&nbsp;теплого Черного моря. Вышел — и&nbsp;ты на&nbsp;пляже!</p>
+            </div>
+            <div class="pain-card glass fade-in">
+                <div class="pain-icon">🍽️</div>
+                <h3>Всё под рукой</h3>
+                <p>Не&nbsp;нужно искать, где перекусить. На&nbsp;территории работает собственное кафе-столовая с&nbsp;вкусной домашней едой.</p>
+            </div>
+            <div class="pain-card glass fade-in">
+                <div class="pain-icon">👨‍👩‍👧‍👦</div>
+                <h3>Отдых для всех</h3>
+                <p>Развлечения для детей и&nbsp;взрослых, комфортные номера со&nbsp;всеми удобствами и&nbsp;закрытая безопасная территория.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section id="services" class="container">
+        <h2 class="section-title fade-in">Наши услуги</h2>
+        <div class="services-grid">
+            <div class="service-card glass fade-in">
+                <div class="service-img-wrapper">
+                    <img src="images/room-1.webp" alt="Номерной фонд" loading="lazy" decoding="async">
+                </div>
+                <div class="service-content">
+                    <h3>Комфортные номера</h3>
+                    <p>Просторные номера с&nbsp;кондиционером, ТВ и&nbsp;собственным санузлом для идеального сна.</p>
+                    <button class="btn btn-secondary" onclick="openModal()">Узнать цены</button>
+                </div>
+            </div>
+            <div class="service-card glass fade-in">
+                <div class="service-img-wrapper">
+                    <img src="images/cafe.webp" alt="Кафе-столовая" loading="lazy" decoding="async">
+                </div>
+                <div class="service-content">
+                    <h3>Кафе-столовая</h3>
+                    <p>Вкусное и&nbsp;разнообразное меню из&nbsp;свежих продуктов на&nbsp;каждый день для всей семьи.</p>
+                </div>
+            </div>
+            <div class="service-card glass fade-in">
+                <div class="service-img-wrapper">
+                    <img src="images/entertainment.webp" alt="Развлечения" loading="lazy" decoding="async">
+                </div>
+                <div class="service-content">
+                    <h3>Развлечения и&nbsp;Трансфер</h3>
+                    <p>Анимация, детские зоны, а&nbsp;также удобный трансфер от&nbsp;ЖД вокзала и&nbsp;аэропорта (от&nbsp;1000 руб).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="container">
+        <h2 class="section-title fade-in">Частые вопросы</h2>
+        <div style="max-width: 800px; margin: 0 auto;">
+            <div class="faq-item glass fade-in" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>Как далеко находится пляж?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>База отдыха «Калина красная» расположена на&nbsp;первой береговой линии. До&nbsp;песчаного пляжа всего 30&nbsp;метров спокойным шагом.</p>
+                </div>
+            </div>
+            <div class="faq-item glass fade-in" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>Есть ли у&nbsp;вас трансфер?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Да, мы предоставляем услугу трансфера от&nbsp;ЖД вокзала и&nbsp;автовокзала Анапы. Стоимость услуги — 1000 рублей. Пожалуйста, заказывайте трансфер заранее.</p>
+                </div>
+            </div>
+            <div class="faq-item glass fade-in" onclick="toggleFaq(this)">
+                <div class="faq-question">
+                    <span>Что входит в&nbsp;стоимость номера?</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>В&nbsp;стоимость проживания входит пользование номером, уборка, доступ к&nbsp;инфраструктуре базы (детские площадки, зоны отдыха). Питание и&nbsp;доп. услуги оплачиваются отдельно.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacts -->
+    <section id="contacts" class="container">
+        <h2 class="section-title fade-in">Контакты</h2>
+        <div class="contacts-wrapper">
+            <div class="contact-info glass fade-in">
+                <div class="contact-item">
+                    <div class="contact-icon">📍</div>
+                    <div class="contact-text">
+                        <h4>Адрес</h4>
+                        <p>г.&nbsp;Анапа, Пионерский проспект, 253 (уточнить)</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">📞</div>
+                    <div class="contact-text">
+                        <h4>Телефон</h4>
+                        <a href="tel:89184445592">8 (918) 444-55-92</a>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">✉️</div>
+                    <div class="contact-text">
+                        <h4>Email</h4>
+                        <a href="mailto:info@калинакрасная.рф">info@калинакрасная.рф</a>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <a href="https://vk.com/kalina_krasnaya_anapa" target="_blank" class="btn btn-secondary" style="width:100%; display:block; text-align:center;">Мы в&nbsp;ВКонтакте</a>
+                </div>
+            </div>
+            <div class="map-container fade-in" id="map"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <h3 style="font-family:'Unbounded', sans-serif; font-size:1.5rem; color:var(--primary); margin-bottom:1rem;">Калина красная</h3>
+            <p style="color:var(--text-muted); margin-bottom:1.5rem;">Ваш идеальный отдых в&nbsp;Анапе. 2026 &copy; Все права защищены.</p>
+            <div class="footer-socials">
+                <a href="https://vk.com/kalina_krasnaya_anapa" target="_blank" class="social-link" aria-label="ВКонтакте">VK</a>
+            </div>
+            <a href="http://калинакрасная23.рф/" target="_blank" style="color:var(--text-muted); font-size:0.9rem; text-decoration:underline;">Старый сайт</a>
+        </div>
+    </footer>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <button class="chat-btn" id="chatBtn" aria-label="Открыть чат">💬</button>
+        <div class="chat-box" id="chatBox">
+            <div class="chat-header">
+                <span>Онлайн-консультант</span>
+                <button class="chat-close" id="chatClose" aria-label="Закрыть чат">×</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-msg msg-bot">
+                    Здравствуйте! 👋 Чем могу помочь с&nbsp;выбором номера?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Введите сообщение...">
+                <button id="chatSend" aria-label="Отправить">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()" aria-label="Закрыть">×</button>
+            <h3 style="margin-bottom:1.5rem; font-family:'Unbounded'; font-size:1.5rem;">Заказать звонок</h3>
+            <form onsubmit="submitForm(event)">
+                <div class="form-group">
+                    <label>Ваше имя</label>
+                    <input type="text" required placeholder="Иван">
+                </div>
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <input type="tel" required placeholder="+7 (999) 000-00-00">
+                </div>
+                <button type="submit" class="btn" style="width:100%;">Отправить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mobile Call Button -->
+    <a href="tel:89184445592" class="mobile-call-btn">
+        📞 Позвонить сейчас
+    </a>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        // Theme logic
+        const html = document.documentElement;
+        const themeBtn = document.getElementById('themeToggle');
+        
+        // Disable wink animation on first click
+        themeBtn.addEventListener('click', () => {
+            themeBtn.classList.remove('wink');
+            let current = html.getAttribute('data-theme');
+            let next = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeIcon(next);
+        });
+
+        function updateThemeIcon(theme) {
+            themeBtn.innerHTML = theme === 'light' ? '🌙' : '☀️';
+        }
+
+        // Init theme
+        const savedTheme = localStorage.getItem('theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme) {
+            html.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            if(savedTheme === 'dark') themeBtn.classList.remove('wink');
+        } else if (systemDark) {
+            // Keep rule: default is light, but if we want to respect system we could. 
+            // Rule says "белая тема по умолчанию", so we'll leave it light unless saved.
+            // Wait, rule: "Все новые сайты должны по умолчанию поддерживать системную темную тему... с плавным переключением".
+            // Rule 3 in PROMPT_TEMPLATE: "Белая тема по умолчанию: При старте сайта по умолчанию всегда активируется белая".
+            // So we obey PROMPT_TEMPLATE (white by default).
+        }
+
+        // Mobile Drawer Menu
+        const menuBtn = document.getElementById('menuBtn');
+        const drawerClose = document.getElementById('drawerClose');
+        const mobileDrawer = document.getElementById('mobileDrawer');
+        const drawerLinks = document.querySelectorAll('.drawer-link');
+
+        menuBtn.addEventListener('click', () => {
+            mobileDrawer.classList.add('active');
+        });
+
+        drawerClose.addEventListener('click', () => {
+            mobileDrawer.classList.remove('active');
+        });
+
+        drawerLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileDrawer.classList.remove('active');
+            });
+        });
+
+        // Slider Ken Burns
+        const slides = document.querySelectorAll('.hero-slide');
+        let currentSlide = 0;
+        
+        if(slides.length > 1) {
+            setInterval(() => {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }, 8000);
+        }
+
+        // FAQ Toggle
+        function toggleFaq(el) {
+            el.classList.toggle('open');
+        }
+
+        // Intersection Observer for fade-ins
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Leaflet Map (Anapa placeholder coords)
+        const map = L.map('map').setView([44.935105, 37.318468], 14);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.marker([44.935105, 37.318468]).addTo(map)
+            .bindPopup('<b>Калина красная</b><br>База отдыха')
+            .openPopup();
+
+        // Chat Widget
+        const chatBtn = document.getElementById('chatBtn');
+        const chatBox = document.getElementById('chatBox');
+        const chatClose = document.getElementById('chatClose');
+        const chatSend = document.getElementById('chatSend');
+        const chatInput = document.getElementById('chatInput');
+        const chatMessages = document.getElementById('chatMessages');
+
+        chatBtn.addEventListener('click', () => {
+            chatBox.classList.add('active');
+            chatBtn.style.display = 'none';
+        });
+
+        chatClose.addEventListener('click', () => {
+            chatBox.classList.remove('active');
+            chatBtn.style.display = 'flex';
+        });
+
+        chatSend.addEventListener('click', handleChatSubmit);
+        chatInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') handleChatSubmit();
+        });
+
+        function handleChatSubmit() {
+            const val = chatInput.value.trim();
+            if(!val) return;
+            
+            // Add user msg
+            const uMsg = document.createElement('div');
+            uMsg.className = 'chat-msg';
+            uMsg.style.background = 'var(--primary)';
+            uMsg.style.color = 'white';
+            uMsg.style.alignSelf = 'flex-end';
+            uMsg.style.borderBottomRightRadius = '5px';
+            uMsg.innerText = val;
+            chatMessages.appendChild(uMsg);
+            
+            chatInput.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Fake bot reply
+            setTimeout(() => {
+                const bMsg = document.createElement('div');
+                bMsg.className = 'chat-msg msg-bot';
+                bMsg.innerHTML = 'Спасибо за&nbsp;сообщение! Оставьте ваш телефон, и&nbsp;мы свяжемся с&nbsp;вами.';
+                chatMessages.appendChild(bMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+        }
+
+        // Modal Form
+        const modalOverlay = document.getElementById('modalOverlay');
+        function openModal() {
+            modalOverlay.classList.add('active');
+        }
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+        function submitForm(e) {
+            e.preventDefault();
+            alert('Спасибо! Заявка отправлена.');
+            closeModal();
+            e.target.reset();
+        }
+    </script>
+</body>
+</html>
